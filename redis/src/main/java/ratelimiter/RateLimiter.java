@@ -31,8 +31,8 @@ public class RateLimiter {
 
         long requestCount = redis.zcard(key);
         if (requestCount < maxRequestCount) {
-            redis.zadd(key, currentTime, String.valueOf(currentTime));
-            redis.pexpire(key, timeWindowSeconds * 1000);
+            redis.zadd(key, currentTime, String.valueOf(Math.random()));
+            redis.expire(key, timeWindowSeconds * 1000);
             return true;
         }
         return false;

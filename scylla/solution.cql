@@ -12,13 +12,13 @@ create table posts_by_users (
 )with clustering order by( created_at desc, post_id asc);
 
 create table posts_by_date_topic (
-    date_posting text,
+    date_posting date,
     topic_id int,
     created_at timestamp,
     user_id int,
     post_id int,
     username text,
-    primary key ((date_posting, topic_id),created_at, user_id, post_id)
+    primary key ((date_posting, topic_id),created_at, post_id)
 )with clustering order by (created_at desc, user_id asc, post_id asc);
 
 select post_id, content, created_at
@@ -32,7 +32,7 @@ limit 1;
 
 select post_id, content, created_at
 from posts_by_users
-where user_id = 3 and created_at >'2026-03-10 23:59:59';
+where user_id = 3 and created_at >='2026-03-10';
 
 select user_id, username, post_id,created_at
 from posts_by_date_topic
