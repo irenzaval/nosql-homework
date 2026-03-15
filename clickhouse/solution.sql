@@ -1,22 +1,31 @@
--- Решение заданий по ClickHouse
+CREATE TABLE IF NOT EXISTS server_logs
+(
+    timestamp DateTime,
+    user_id UInt32,
+    endpoint String,
+    response_time_ms UInt32,
+    status_code UInt16
+) ENGINE = MergeTree()
+ORDER BY (timestamp,endpoint);
 
--- 1. Создание таблицы
--- TODO: скопируйте и доработайте CREATE TABLE из schema.sql
+select
+    endpoint,
+    round(avg(response_time_ms), 2) as avg_response_time
+from server_logs
+group by endpoint
+order by avg_response_time desc
+limit 5;
 
+select
+    toHour(timestamp) as hour,
+    count(*) as request_count
+from server_logs
+group by hour
+order by hour;
 
--- 2. Загрузка данных из CSV
--- Подсказка: можно использовать clickhouse-client с параметром --query
--- Пример команды (выполняется в терминале):
--- cat server_logs.csv | clickhouse-client --query="INSERT INTO server_logs FORMAT CSVWithNames"
-
-
--- 3. Запрос: Топ-5 самых медленных endpoint'ов (по среднему времени ответа)
--- TODO: напишите SELECT запрос
-
-
--- 4. Запрос: Количество запросов по часам за весь период в логах
--- TODO: напишите SELECT запрос с использованием функции toHour() или formatDateTime()
-
-
--- 5. Запрос: Процент ошибок (status_code >= 400) для каждого endpoint'а
--- TODO: напишите SELECT запрос с вычислением процента ошибок
+select
+    endpoint,
+    round((countIf(status_code >= 400) / count(*)) * 100, 2) as error_percentage
+from server_logs
+group by endpoint
+order by error_percentage desc;
